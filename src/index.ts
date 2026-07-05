@@ -5,6 +5,7 @@ export type {
   CustodianConfig,
   CustodianBranding,
   CustodianModule,
+  CustodianModuleSummary,
   CustodianModuleProps,
   CustodianEditModuleProps,
 } from './types'

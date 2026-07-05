@@ -6,7 +6,7 @@ import type { AdminSession } from '@silviomarini/auth'
 import { checkAdminAccess } from '../auth/gate'
 import { LoginPage } from '../components/LoginPage'
 import { AdminLayout } from '../components/AdminLayout'
-import type { CustodianConfig } from '../types'
+import type { CustodianConfig, CustodianModuleSummary } from '../types'
 import type { CustodianApp } from '../create-app'
 
 /**
@@ -48,9 +48,17 @@ export function createLoginPage(config: CustodianConfig) {
 
 /** Layout component for app/admin/layout.tsx — persists the nav across module navigation. */
 export function createAdminLayoutComponent(app: CustodianApp) {
+  // AdminLayout is a Client Component: only pass the serializable subset of
+  // each module across the boundary, never listComponent/editComponent (functions).
+  const moduleSummaries: CustodianModuleSummary[] = app.modules.map(({ id, label, route }) => ({
+    id,
+    label,
+    route,
+  }))
+
   return function CustodianAdminLayout({ children }: { children: React.ReactNode }) {
     return (
-      <AdminLayout modules={app.modules} config={app.config}>
+      <AdminLayout modules={moduleSummaries} config={app.config}>
         {children}
       </AdminLayout>
     )

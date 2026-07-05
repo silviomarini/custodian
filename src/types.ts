@@ -43,3 +43,15 @@ export interface CustodianModule {
   listComponent: ComponentType<CustodianModuleProps>
   editComponent?: ComponentType<CustodianEditModuleProps>
 }
+
+/**
+ * Data-only subset of CustodianModule — safe to pass across the Server/Client
+ * boundary into 'use client' components (e.g. AdminLayout's nav), since
+ * listComponent/editComponent are functions and React cannot serialize those
+ * as props on a Client Component.
+ */
+export interface CustodianModuleSummary {
+  id: string
+  label: string
+  route: string
+}

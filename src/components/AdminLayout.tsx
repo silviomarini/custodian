@@ -2,10 +2,10 @@
 
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
-import type { CustodianConfig, CustodianModule } from '../types'
+import type { CustodianConfig, CustodianModuleSummary } from '../types'
 
 export interface AdminLayoutProps {
-  modules: CustodianModule[]
+  modules: CustodianModuleSummary[]
   config: CustodianConfig
   children: ReactNode
 }
