@@ -10,14 +10,31 @@ export type { BlogModuleOptions, BlogDb } from './types'
  * @silviomarini/blog-engine. Custodian's core never imports this file.
  */
 export function createBlogModule(options: BlogModuleOptions): CustodianModule {
-  const { getDb, categories, defaultLang = 'it', id = 'blog', label = 'Blog', route = 'blog' } = options
+  const {
+    getDb,
+    categories,
+    defaultLang = 'it',
+    apiBasePath = '/api/articles',
+    id = 'blog',
+    label = 'Blog',
+    route = 'blog',
+  } = options
 
   function ListComponent(props: CustodianModuleProps) {
     return <BlogListPage {...props} getDb={getDb} categories={categories} defaultLang={defaultLang} route={route} />
   }
 
   function EditComponent(props: CustodianEditModuleProps) {
-    return <BlogEditForm {...props} getDb={getDb} categories={categories} defaultLang={defaultLang} route={route} />
+    return (
+      <BlogEditForm
+        {...props}
+        getDb={getDb}
+        categories={categories}
+        defaultLang={defaultLang}
+        route={route}
+        apiBasePath={apiBasePath}
+      />
+    )
   }
 
   return {

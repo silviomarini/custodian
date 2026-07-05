@@ -30,6 +30,10 @@ const blogModule = createBlogModule({
   getDb,
   categories: BLOG_CATEGORIES,
   defaultLang: 'it',
+  // Mounted below via blog-engine's route handler adapter (see lib/blog-api.ts
+  // and app/api/articles/**). The edit form fetch()es this, it can't use a
+  // Server Action shipped from @silviomarini/custodian.
+  apiBasePath: '/api/articles',
 })
 
 export const custodianApp = createCustodianApp([blogModule], custodianConfig)
