@@ -1,6 +1,6 @@
 {
   "name": "@silviomarini/custodian",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Admin panel shell — auth, layout, and a pluggable module system",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
