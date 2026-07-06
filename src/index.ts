@@ -21,6 +21,8 @@ export { LoginPage } from './components/LoginPage'
 export type { AdminLayoutProps } from './components/AdminLayout'
 export { AdminLayout } from './components/AdminLayout'
 
+export { DashboardPage } from './components/DashboardPage'
+
 export type { ThemeToggleProps } from './components/ThemeToggle'
 export { ThemeToggle } from './components/ThemeToggle'
 
@@ -30,6 +32,7 @@ export { initTheme, toggleTheme, THEME_INIT_SCRIPT } from './theme'
 export {
   createCustodianMiddleware,
   createLoginPage,
+  createHomePage,
   createAdminLayoutComponent,
   createModulePage,
   createModuleEditPage,

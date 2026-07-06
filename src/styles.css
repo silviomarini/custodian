@@ -30,9 +30,12 @@
 
 /* ---------- Shell / nav (AdminLayout.tsx) ---------- */
 /* Mobile-first: nav is a hidden off-canvas drawer opened by a hamburger
-   button, fully expanded (labels + children visible) when open.
-   From 768px up it becomes a persistent icon-only rail; a module with
-   children opens a flyout on hover/focus instead of expanding inline. */
+   button, fully expanded (labels + children always visible) when open.
+   From 768px up it becomes a persistent sidebar with two states, toggled by
+   a hamburger button inside the nav itself and persisted to localStorage:
+     - expanded (default): icon + label; a module with children is a section
+       that auto-opens only while the current pathname is inside it.
+     - collapsed: icons only, no labels, no children (expand to reach them). */
 
 .custodian-shell {
   display: flex;
@@ -88,6 +91,13 @@
   transform: translateX(0);
 }
 
+.custodian-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
 .custodian-brand {
   font-weight: 600;
   font-size: 1.0625rem;
@@ -95,6 +105,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Desktop-only: mobile has its own separate hamburger (.custodian-nav-toggle). */
+.custodian-nav-collapse-toggle {
+  display: none;
 }
 
 .custodian-nav-list {
@@ -110,7 +125,6 @@
 .custodian-nav-group {
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
 .custodian-nav-item > a,
@@ -158,8 +172,8 @@
   color: inherit;
 }
 
-/* Mobile: children render inline, indented, always visible — no room to hide them. */
-.custodian-nav-flyout {
+/* Mobile: children render inline, indented, always visible — no accordion, nothing to hide. */
+.custodian-nav-children {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
@@ -168,7 +182,7 @@
   padding: 0 0 0 2.375rem;
 }
 
-.custodian-nav-flyout a {
+.custodian-nav-children a {
   display: block;
   padding: 0.375rem 0.625rem;
   border-radius: 0.4375rem;
@@ -177,12 +191,12 @@
   font-size: 0.875rem;
 }
 
-.custodian-nav-flyout a:hover {
+.custodian-nav-children a:hover {
   background: var(--custodian-bg);
   color: var(--custodian-text);
 }
 
-.custodian-nav-flyout a[aria-current='page'] {
+.custodian-nav-children a[aria-current='page'] {
   color: var(--custodian-accent);
   font-weight: 600;
 }
@@ -210,41 +224,65 @@
     inset: auto;
     top: 0;
     z-index: 1;
-    align-items: center;
-    width: 4.5rem;
+    width: 240px;
     flex-shrink: 0;
-    padding: 1rem 0.625rem;
+    padding: 1.25rem 0.75rem;
     transform: none;
-    transition: none;
+    transition: width 0.2s ease;
   }
 
-  .custodian-brand {
-    max-width: 100%;
-    text-align: center;
-    font-size: 0.8125rem;
+  .custodian-nav-collapse-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: none;
+    border-radius: 0.375rem;
+    background: none;
+    color: var(--custodian-text-secondary);
+    cursor: pointer;
   }
 
-  .custodian-nav-list {
-    width: 100%;
+  .custodian-nav-collapse-toggle:hover {
+    background: var(--custodian-bg);
+    color: var(--custodian-text);
+  }
+
+  .custodian-content {
+    padding: 2rem;
+  }
+
+  /* ---- Collapsed state: icon rail, no labels, no children ---- */
+
+  .custodian-nav--collapsed {
+    width: 4.5rem;
+  }
+
+  .custodian-nav--collapsed .custodian-nav-header {
+    justify-content: center;
+  }
+
+  .custodian-nav--collapsed .custodian-brand {
+    display: none;
+  }
+
+  .custodian-nav--collapsed .custodian-nav-list,
+  .custodian-nav--collapsed .custodian-nav-item,
+  .custodian-nav--collapsed .custodian-nav-group {
     align-items: center;
   }
 
-  .custodian-nav-item,
-  .custodian-nav-group {
-    width: 100%;
-    align-items: center;
-  }
-
-  .custodian-nav-item > a,
-  .custodian-nav-group > a {
+  .custodian-nav--collapsed .custodian-nav-item > a,
+  .custodian-nav--collapsed .custodian-nav-group > a {
     flex-direction: column;
     gap: 0.25rem;
-    width: 100%;
     padding: 0.5rem 0.25rem;
   }
 
-  /* Rail mode: label collapses to a visually-hidden, screen-reader-only string; title="" on the <a> covers sighted hover. */
-  .custodian-nav-label {
+  /* Visually-hidden, screen-reader-only label; title="" on the <a> covers sighted hover. */
+  .custodian-nav--collapsed .custodian-nav-label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -253,36 +291,31 @@
     white-space: nowrap;
   }
 
-  /* Flyout: hidden by default, revealed on hover/focus of the group. */
-  .custodian-nav-flyout {
-    position: absolute;
-    left: calc(100% + 0.5rem);
-    top: 0;
-    z-index: 10;
-    width: max-content;
-    min-width: 160px;
-    margin: 0;
-    padding: 0.375rem;
-    background: var(--custodian-surface);
-    border: 1px solid var(--custodian-border);
-    border-radius: 0.625rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.12s ease;
+  /* Expanded: a section's children are hidden unless it's the active section. */
+  .custodian-nav-children {
+    display: none;
   }
 
-  .custodian-nav-group:hover .custodian-nav-flyout,
-  .custodian-nav-group:focus-within .custodian-nav-flyout {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
+  .custodian-nav:not(.custodian-nav--collapsed) .custodian-nav-group--open > .custodian-nav-children {
+    display: flex;
   }
+}
 
-  .custodian-content {
-    padding: 2rem;
-  }
+/* ---------- Dashboard (DashboardPage.tsx) ---------- */
+
+.custodian-dashboard {
+  font-family: var(--custodian-font-ui);
+  color: var(--custodian-text);
+}
+
+.custodian-dashboard h1 {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+}
+
+.custodian-dashboard p {
+  color: var(--custodian-text-secondary);
+  margin: 0;
 }
 
 /* ---------- Login (LoginPage.tsx) ---------- */

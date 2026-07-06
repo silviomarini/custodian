@@ -6,6 +6,7 @@ import type { AdminSession } from '@silviomarini/auth'
 import { checkAdminAccess } from '../auth/gate'
 import { LoginPage } from '../components/LoginPage'
 import { AdminLayout } from '../components/AdminLayout'
+import { DashboardPage } from '../components/DashboardPage'
 import type { CustodianConfig, CustodianModuleSummary } from '../types'
 import type { CustodianApp } from '../create-app'
 
@@ -43,6 +44,21 @@ export function createCustodianMiddleware(config: CustodianConfig) {
 export function createLoginPage(config: CustodianConfig) {
   return function CustodianLoginPage() {
     return <LoginPage config={config} />
+  }
+}
+
+/**
+ * Page component for app/admin/page.tsx — the panel's home/dashboard at the
+ * root of basePath. No auth check here: the middleware already gates every
+ * /admin/* route (except /admin/login), so this page assumes it was reached
+ * authenticated.
+ */
+export function createHomePage(app: CustodianApp) {
+  // app isn't read today — DashboardPage takes no config — but kept as a
+  // parameter for signature consistency with the other create*Page factories,
+  // and in case the dashboard needs app.config/app.modules later.
+  return function CustodianHomePage() {
+    return <DashboardPage />
   }
 }
 
