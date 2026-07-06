@@ -18,7 +18,7 @@ export const custodianConfig: CustodianConfig = {
   basePath: '/admin',
 }
 
-async function getDb() {
+export async function getDb() {
   const cookieStore = await cookies()
   return createSupabaseServerClient(cookieStore, {
     supabaseUrl: custodianConfig.supabaseUrl,

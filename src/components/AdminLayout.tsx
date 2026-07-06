@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { ThemeToggle } from './ThemeToggle'
 import type { CustodianConfig, CustodianModuleSummary } from '../types'
@@ -9,6 +9,15 @@ import type { CustodianConfig, CustodianModuleSummary } from '../types'
 export interface AdminLayoutProps {
   modules: CustodianModuleSummary[]
   config: CustodianConfig
+  /** GET here for live-saved branding settings. Default: '/api/settings'. Ignored when resolvedAccentColor is provided. */
+  settingsApiBasePath?: string
+  /**
+   * Server-resolved accent color, passed by a consumer's async layout.tsx
+   * that already called getSettings(db) itself. When present, this is used
+   * directly and the client-side settings fetch below never runs — no flash
+   * of the fallback color on first paint.
+   */
+  resolvedAccentColor?: string
   children: ReactNode
 }
 
@@ -36,12 +45,25 @@ function initials(label: string): string {
  *     to reveal its children indented below. No manual per-section toggle.
  *   - Collapsed: icons only, no labels, no children (nothing to expand into —
  *     the old hover flyout is gone; expand the sidebar first to reach them).
+ *
+ * Accent color precedence: resolvedAccentColor (server-resolved by the
+ * consumer's layout.tsx) > a value fetched client-side from
+ * settingsApiBasePath (only when resolvedAccentColor wasn't provided) >
+ * config.branding.accentColor. The static config value is only ever a
+ * fallback for first-time setup, before anything's been saved.
  */
-export function AdminLayout({ modules, config, children }: AdminLayoutProps) {
+export function AdminLayout({
+  modules,
+  config,
+  settingsApiBasePath = '/api/settings',
+  resolvedAccentColor,
+  children,
+}: AdminLayoutProps) {
   const pathname = usePathname()
   const basePath = config.basePath ?? '/admin'
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const [savedAccentColor, setSavedAccentColor] = useState<string | null>(null)
 
   useEffect(() => {
     setMobileNavOpen(false)
@@ -50,6 +72,27 @@ export function AdminLayout({ modules, config, children }: AdminLayoutProps) {
   useEffect(() => {
     setCollapsed(localStorage.getItem(NAV_COLLAPSED_KEY) === 'true')
   }, [])
+
+  useEffect(() => {
+    // Already resolved server-side — skip the fetch entirely, no flash.
+    if (resolvedAccentColor) return
+
+    let cancelled = false
+
+    fetch(settingsApiBasePath)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json: { data?: { accent_color?: string } } | null) => {
+        if (!cancelled && json?.data?.accent_color) setSavedAccentColor(json.data.accent_color)
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [settingsApiBasePath, resolvedAccentColor])
+
+  const accentColor = resolvedAccentColor ?? savedAccentColor ?? config.branding?.accentColor
+  const shellStyle = accentColor ? ({ '--custodian-accent': accentColor } as CSSProperties) : undefined
 
   function toggleCollapsed() {
     setCollapsed((wasCollapsed) => {
@@ -69,7 +112,7 @@ export function AdminLayout({ modules, config, children }: AdminLayoutProps) {
     .join(' ')
 
   return (
-    <div className="custodian-shell">
+    <div className="custodian-shell" style={shellStyle}>
       <button
         type="button"
         className="custodian-nav-toggle"
@@ -150,6 +193,22 @@ export function AdminLayout({ modules, config, children }: AdminLayoutProps) {
               </li>
             )
           })}
+
+          <li className="custodian-nav-item">
+            <a
+              href={`${basePath}/settings`}
+              title="Impostazioni"
+              aria-current={pathname === `${basePath}/settings` ? 'page' : undefined}
+            >
+              <span className="custodian-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 13.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </span>
+              <span className="custodian-nav-label">Impostazioni</span>
+            </a>
+          </li>
         </ul>
 
         <ThemeToggle />

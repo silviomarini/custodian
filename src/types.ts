@@ -4,6 +4,12 @@ import type { ComponentType, ReactNode } from 'react'
 export interface CustodianBranding {
   title?: string
   logoUrl?: string
+  /**
+   * Static fallback accent color (e.g. '#3D4759'). Once branding settings
+   * are saved via the Impostazioni page (persisted in Supabase), the saved
+   * value takes precedence over this whenever one exists — see AdminLayout.
+   */
+  accentColor?: string
 }
 
 /**
@@ -21,6 +27,11 @@ export interface CustodianConfig {
   basePath?: string
   /** emailRedirectTo passed to the magic-link sign-in call. */
   loginRedirectTo?: string
+  /**
+   * REST endpoint for branding settings: GET/PATCH here, POST to
+   * `${settingsApiBasePath}/logo` for the logo upload. Default: '/api/settings'.
+   */
+  settingsApiBasePath?: string
 }
 
 export interface CustodianModuleProps {
