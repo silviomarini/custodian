@@ -41,7 +41,23 @@ export function createBlogModule(options: BlogModuleOptions): CustodianModule {
     id,
     label,
     route,
+    // Kept directly on the module (not just in `children`) for backward
+    // compatibility: today's adapter (createModulePage/createModuleEditPage)
+    // still reads these two fields straight off the module, since routing
+    // is single-level for now. `children` below is the same UI registered
+    // under a "articoli" sub-route, ready for when nav/routing grows a
+    // second level (e.g. adding "categorie" alongside it) without another
+    // interface change.
     listComponent: ListComponent,
     editComponent: EditComponent,
+    children: [
+      {
+        id: 'articoli',
+        label: 'Articoli',
+        route: 'articoli',
+        listComponent: ListComponent,
+        editComponent: EditComponent,
+      },
+    ],
   }
 }

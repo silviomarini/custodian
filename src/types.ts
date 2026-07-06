@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 /** Static branding for the admin shell — everything optional, no defaults baked into content. */
 export interface CustodianBranding {
@@ -33,15 +33,47 @@ export interface CustodianEditModuleProps extends CustodianModuleProps {
 }
 
 /**
- * A registrable admin panel module. Custodian's core only ever sees this
- * shape — it has no knowledge of what a module actually manages.
+ * A single entry in a module's two-level nav (e.g. blog's "articoli",
+ * later "categorie"). Same list/edit component shape a top-level module
+ * without children would use.
  */
-export interface CustodianModule {
+export interface CustodianNavChild {
   id: string
   label: string
   route: string
   listComponent: ComponentType<CustodianModuleProps>
   editComponent?: ComponentType<CustodianEditModuleProps>
+}
+
+/**
+ * A registrable admin panel module. Custodian's core only ever sees this
+ * shape — it has no knowledge of what a module actually manages.
+ *
+ * listComponent/editComponent are optional so a module can register purely
+ * via `children` (two-level nav). A module without children behaves exactly
+ * as before, rendering its own listComponent/editComponent directly. When
+ * `children` is present, navigation/routing must resolve through them
+ * instead of the module's own listComponent/editComponent.
+ */
+export interface CustodianModule {
+  id: string
+  label: string
+  route: string
+  listComponent?: ComponentType<CustodianModuleProps>
+  editComponent?: ComponentType<CustodianEditModuleProps>
+  children?: CustodianNavChild[]
+  /**
+   * Reserved for a future real icon in the nav rail. Not read anywhere yet —
+   * AdminLayout falls back to the module's initials until this is wired up.
+   */
+  icon?: ReactNode
+}
+
+/** Data-only subset of CustodianNavChild — see CustodianModuleSummary. */
+export interface CustodianNavChildSummary {
+  id: string
+  label: string
+  route: string
 }
 
 /**
@@ -54,4 +86,5 @@ export interface CustodianModuleSummary {
   id: string
   label: string
   route: string
+  children?: CustodianNavChildSummary[]
 }

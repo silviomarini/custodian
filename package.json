@@ -12,13 +12,14 @@
     "./blog": {
       "types": "./dist/modules/blog/index.d.ts",
       "default": "./dist/modules/blog/index.js"
-    }
+    },
+    "./styles.css": "./dist/styles.css"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/styles.css dist/styles.css",
     "build:watch": "tsc --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build"

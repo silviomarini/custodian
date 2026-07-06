@@ -49,11 +49,17 @@ export function createLoginPage(config: CustodianConfig) {
 /** Layout component for app/admin/layout.tsx — persists the nav across module navigation. */
 export function createAdminLayoutComponent(app: CustodianApp) {
   // AdminLayout is a Client Component: only pass the serializable subset of
-  // each module across the boundary, never listComponent/editComponent (functions).
-  const moduleSummaries: CustodianModuleSummary[] = app.modules.map(({ id, label, route }) => ({
+  // each module (and its children) across the boundary, never
+  // listComponent/editComponent (functions).
+  const moduleSummaries: CustodianModuleSummary[] = app.modules.map(({ id, label, route, children }) => ({
     id,
     label,
     route,
+    children: children?.map(({ id: childId, label: childLabel, route: childRoute }) => ({
+      id: childId,
+      label: childLabel,
+      route: childRoute,
+    })),
   }))
 
   return function CustodianAdminLayout({ children }: { children: React.ReactNode }) {
@@ -74,7 +80,7 @@ export function createModulePage(app: CustodianApp) {
   }) {
     const { module: routeSegment } = await params
     const mod = app.getModuleByRoute(routeSegment)
-    if (!mod) notFound()
+    if (!mod?.listComponent) notFound()
 
     const List = mod.listComponent
     return <List config={app.config} />

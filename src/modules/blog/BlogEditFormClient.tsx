@@ -78,25 +78,27 @@ export function BlogEditFormClient({
         <input name="title" defaultValue={existing?.title} required />
       </label>
 
-      <label>
-        Categoria
-        <select name="category" defaultValue={existing?.category ?? ''}>
-          <option value="">—</option>
-          {categories.map((category) => (
-            <option key={category.slug} value={category.slug}>
-              {category[defaultLang] ?? category.slug}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="custodian-blog-form-row">
+        <label>
+          Categoria
+          <select name="category" defaultValue={existing?.category ?? ''}>
+            <option value="">—</option>
+            {categories.map((category) => (
+              <option key={category.slug} value={category.slug}>
+                {category[defaultLang] ?? category.slug}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      <label>
-        Lingua
-        <select name="lang" defaultValue={existing?.lang ?? defaultLang}>
-          <option value="it">it</option>
-          <option value="en">en</option>
-        </select>
-      </label>
+        <label>
+          Lingua
+          <select name="lang" defaultValue={existing?.lang ?? defaultLang}>
+            <option value="it">it</option>
+            <option value="en">en</option>
+          </select>
+        </label>
+      </div>
 
       <label>
         Estratto
@@ -113,10 +115,28 @@ export function BlogEditFormClient({
         Pubblicato
       </label>
 
-      {status.type === 'error' && <p role="alert">{status.message}</p>}
+      {status.type === 'error' && (
+        <p role="alert" className="custodian-form-status custodian-form-status--error">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{status.message}</span>
+        </p>
+      )}
+
+      {status.type === 'saving' && (
+        <p role="status" className="custodian-form-status custodian-form-status--saving">
+          <svg aria-hidden="true" className="custodian-spinner" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M21 12a9 9 0 1 1-9-9" />
+          </svg>
+          <span>Salvataggio in corso…</span>
+        </p>
+      )}
 
       <button type="submit" disabled={status.type === 'saving'}>
-        Salva
+        {status.type === 'saving' ? 'Salvataggio…' : 'Salva'}
       </button>
     </form>
   )

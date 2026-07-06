@@ -21,6 +21,12 @@ export { LoginPage } from './components/LoginPage'
 export type { AdminLayoutProps } from './components/AdminLayout'
 export { AdminLayout } from './components/AdminLayout'
 
+export type { ThemeToggleProps } from './components/ThemeToggle'
+export { ThemeToggle } from './components/ThemeToggle'
+
+export type { CustodianThemePreference } from './theme'
+export { initTheme, toggleTheme, THEME_INIT_SCRIPT } from './theme'
+
 export {
   createCustodianMiddleware,
   createLoginPage,
