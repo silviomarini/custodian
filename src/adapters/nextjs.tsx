@@ -7,8 +7,22 @@ import { checkAdminAccess } from '../auth/gate'
 import { LoginPage } from '../components/LoginPage'
 import { AdminLayout } from '../components/AdminLayout'
 import { DashboardPage } from '../components/DashboardPage'
-import type { CustodianConfig, CustodianModuleSummary } from '../types'
+import type { CustodianConfig, CustodianModule, CustodianModuleSummary } from '../types'
 import type { CustodianApp } from '../create-app'
+
+/** Strips listComponent/editComponent (functions) so this can cross into a Client Component. */
+function toModuleSummaries(modules: CustodianModule[]): CustodianModuleSummary[] {
+  return modules.map(({ id, label, route, children }) => ({
+    id,
+    label,
+    route,
+    children: children?.map(({ id: childId, label: childLabel, route: childRoute }) => ({
+      id: childId,
+      label: childLabel,
+      route: childRoute,
+    })),
+  }))
+}
 
 /**
  * Builds the middleware that gates every /admin/* route behind verifyAdmin.
@@ -54,11 +68,10 @@ export function createLoginPage(config: CustodianConfig) {
  * authenticated.
  */
 export function createHomePage(app: CustodianApp) {
-  // app isn't read today — DashboardPage takes no config — but kept as a
-  // parameter for signature consistency with the other create*Page factories,
-  // and in case the dashboard needs app.config/app.modules later.
+  const moduleSummaries = toModuleSummaries(app.modules)
+
   return function CustodianHomePage() {
-    return <DashboardPage />
+    return <DashboardPage config={app.config} modules={moduleSummaries} />
   }
 }
 
@@ -67,16 +80,7 @@ export function createAdminLayoutComponent(app: CustodianApp) {
   // AdminLayout is a Client Component: only pass the serializable subset of
   // each module (and its children) across the boundary, never
   // listComponent/editComponent (functions).
-  const moduleSummaries: CustodianModuleSummary[] = app.modules.map(({ id, label, route, children }) => ({
-    id,
-    label,
-    route,
-    children: children?.map(({ id: childId, label: childLabel, route: childRoute }) => ({
-      id: childId,
-      label: childLabel,
-      route: childRoute,
-    })),
-  }))
+  const moduleSummaries = toModuleSummaries(app.modules)
 
   return function CustodianAdminLayout({ children }: { children: React.ReactNode }) {
     return (

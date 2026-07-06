@@ -35,42 +35,44 @@ export async function BlogListPage({ config, getDb, categories, defaultLang, rou
       </header>
 
       <div className="custodian-blog-list-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Titolo</th>
-              <th>Categoria</th>
-              <th>Lingua</th>
-              <th>Pubblicato il</th>
-              <th>Views</th>
-              <th>Stato</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {articles.map((article) => (
-              <tr key={article.id}>
-                <td>{article.title}</td>
-                <td>{categoryLabel(categories, article.category, defaultLang)}</td>
-                <td>{article.lang}</td>
-                <td className="custodian-mono">{formatDate(article.published_at)}</td>
-                <td className="custodian-mono">{article.views}</td>
-                <td>
-                  <span
-                    className={`custodian-tag ${
-                      article.published ? 'custodian-tag--published' : 'custodian-tag--draft'
-                    }`}
-                  >
-                    {article.published ? 'Pubblicato' : 'Bozza'}
-                  </span>
-                </td>
-                <td>
-                  <a href={`${basePath}/${route}/${article.id}`}>Modifica</a>
-                </td>
+        <div className="custodian-table">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Titolo</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Lingua</th>
+                <th scope="col">Pubblicato il</th>
+                <th scope="col">Views</th>
+                <th scope="col">Stato</th>
+                <th scope="col" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {articles.map((article) => (
+                <tr key={article.id}>
+                  <td>{article.title}</td>
+                  <td>{categoryLabel(categories, article.category, defaultLang)}</td>
+                  <td>{article.lang}</td>
+                  <td className="custodian-mono">{formatDate(article.published_at)}</td>
+                  <td className="custodian-mono">{article.views}</td>
+                  <td>
+                    <span
+                      className={`custodian-tag ${
+                        article.published ? 'custodian-tag--published' : 'custodian-tag--draft'
+                      }`}
+                    >
+                      {article.published ? 'Pubblicato' : 'Bozza'}
+                    </span>
+                  </td>
+                  <td>
+                    <a href={`${basePath}/${route}/${article.id}`}>Modifica</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
