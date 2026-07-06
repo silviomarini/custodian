@@ -14,7 +14,12 @@
   --custodian-border: #E8E6E1;
   --custodian-text: #18181B;
   --custodian-text-secondary: #6B6B70;
+  --custodian-text-muted: #9C9C97;
   --custodian-accent: #3D4759;
+  --custodian-success: #3B6D11;
+  --custodian-bg-success: #EAF3DE;
+  --custodian-danger: #A32D2D;
+  --custodian-bg-danger: #FCEBEB;
   --custodian-font-ui: 'Manrope', system-ui, sans-serif;
   --custodian-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
@@ -25,7 +30,153 @@
   --custodian-border: #2A2A2E;
   --custodian-text: #F2F2F0;
   --custodian-text-secondary: #9C9CA3;
+  --custodian-text-muted: #6B6B70;
+  --custodian-success: #97C459;
+  --custodian-bg-success: #173404;
+  --custodian-danger: #F09595;
+  --custodian-bg-danger: #501313;
   /* --custodian-accent is intentionally not overridden — the brand color stays fixed across themes. */
+}
+
+/* ---------- Shared components (used across every component in the package) ---------- */
+
+/* Small pill label. Bg+color come from a modifier — .custodian-tag--published/
+   --draft (BlogListPage) are kept as aliases of --success/--neutral so existing
+   markup doesn't need to change. */
+.custodian-tag {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.custodian-tag--success,
+.custodian-tag--published {
+  background: var(--custodian-bg-success);
+  color: var(--custodian-success);
+}
+
+.custodian-tag--neutral,
+.custodian-tag--draft {
+  background: var(--custodian-surface);
+  color: var(--custodian-text-secondary);
+}
+
+/* Row with icon + text. Three variants; --danger can hold a right-aligned
+   text action (.custodian-banner-action). */
+.custodian-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.custodian-banner svg {
+  flex-shrink: 0;
+}
+
+.custodian-banner--info {
+  background: var(--custodian-surface);
+  color: var(--custodian-text);
+  border: 1px solid var(--custodian-border);
+}
+
+.custodian-banner--success {
+  background: var(--custodian-bg-success);
+  color: var(--custodian-success);
+}
+
+.custodian-banner--danger {
+  background: var(--custodian-bg-danger);
+  color: var(--custodian-danger);
+}
+
+.custodian-banner-action {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Clickable card for dashboard-style grids. No shadow — hover just shifts the bg. */
+.custodian-tile {
+  display: block;
+  background: var(--custodian-surface);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.custodian-tile:hover {
+  background: var(--custodian-bg);
+}
+
+/* Table wrapper with a rounded outer border. Wrap a <table> in this div;
+   the table itself stays border-collapse with no border of its own.
+   Note: overflow:hidden clips the rounded corners, so a very wide table
+   needs its own horizontal-scroll wrapper around .custodian-table. */
+.custodian-table {
+  overflow: hidden;
+  border: 1px solid var(--custodian-border);
+  border-radius: 0.75rem;
+}
+
+.custodian-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.custodian-table th {
+  text-align: left;
+  padding: 0.625rem 0.75rem;
+  background: var(--custodian-surface);
+  color: var(--custodian-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.custodian-table td {
+  padding: 0.625rem 0.75rem;
+  border-top: 1px solid var(--custodian-border);
+}
+
+.custodian-table tbody tr:hover {
+  background: var(--custodian-bg);
+}
+
+/* Field error state: add to the element wrapping the input (e.g. a <label>). */
+.custodian-field-error input,
+.custodian-field-error select,
+.custodian-field-error textarea {
+  border-color: var(--custodian-danger);
+}
+
+.custodian-field-error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--custodian-danger);
+}
+
+.custodian-field-error-message svg {
+  flex-shrink: 0;
 }
 
 /* ---------- Shell / nav (AdminLayout.tsx) ---------- */
@@ -410,7 +561,7 @@
 }
 
 .custodian-login [role='alert'] {
-  color: #B3261E;
+  color: var(--custodian-danger);
   font-size: 0.875rem;
 }
 
@@ -485,25 +636,8 @@
   font-size: 0.8125rem;
 }
 
-/* Bordered tag, not a filled color badge. */
-.custodian-tag {
-  display: inline-block;
-  padding: 0.125rem 0.5rem;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  background: transparent;
-  white-space: nowrap;
-}
-
-.custodian-tag--published {
-  color: #2E7D32;
-}
-
-.custodian-tag--draft {
-  color: var(--custodian-text-secondary);
-}
+/* .custodian-tag (with --published/--draft modifiers) now lives in the
+   shared components section above. */
 
 @media (min-width: 768px) {
   .custodian-blog-list header {
@@ -619,7 +753,7 @@
 }
 
 .custodian-form-status--error {
-  color: #B3261E;
+  color: var(--custodian-danger);
   border: 1px solid currentColor;
 }
 
